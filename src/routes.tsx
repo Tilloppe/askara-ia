@@ -58,6 +58,11 @@ const NewContact = lazyWithRetry(() => import('./pages/NewContact'));
 const Documents = lazyWithRetry(() => import('./pages/Documents'));
 const DocumentDetail = lazyWithRetry(() => import('./pages/DocumentDetail'));
 const PricingPage = lazyWithRetry(() => import('./pages/PricingPage'));
+const ContactPage = lazyWithRetry(() => import('./pages/ContactPage'));
+const HelpAndSupportPage = lazyWithRetry(() => import('./pages/HelpAndSupportPage'));
+const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'));
+const TeamPage = lazyWithRetry(() => import('./pages/TeamPage'));
+const SoftwareGatewayPage = lazyWithRetry(() => import('./pages/SoftwareGatewayPage'));
 
 // Layout protégé avec gestion du chargement
 const ProtectedLayout = () => (
@@ -130,6 +135,12 @@ const AppRoutes = () => {
           <Route path="documents" element={<Documents />} />
           <Route path="documents/:id" element={<DocumentDetail />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="help" element={<HelpAndSupportPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="equipe" element={<TeamPage />} />
+          <Route path="software-gateway" element={<SoftwareGatewayPage />} />
+          <Route path="passerelle" element={<Navigate to="/software-gateway" replace />} />
           {/* Ajoutez ici d'autres routes protégées au besoin */}
         </Route>
         

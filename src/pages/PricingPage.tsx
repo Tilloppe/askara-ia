@@ -71,38 +71,43 @@ const PricingPage = () => {
   ];
 
   return (
-    <Box bg={bgColor} minH="100vh" py={20}>
-      <Container maxW="7xl" py={16} as={Stack} spacing={12}>
-        <Stack spacing={4} textAlign="center" maxW="4xl" mx="auto">
-          <Text color="blue.500" fontWeight={600} fontSize="lg">
+    <Box bg={bgColor} minH="calc(100vh - 64px)" display="flex" alignItems="center">
+      <Container maxW="7xl" py={8} as={Stack} spacing={8}>
+        <Stack spacing={3} textAlign="center" maxW="3xl" mx="auto">
+          <Text color="blue.500" fontWeight={600} fontSize="md">
             Tarification
           </Text>
-          <Heading as="h1" size="2xl" fontWeight="bold">
+          <Heading as="h1" size="xl" fontWeight="bold">
             Des forfaits adaptés à vos besoins
           </Heading>
-          <Text fontSize="lg" color={useColorModeValue('gray.600', 'gray.400')}>
-            Choisissez le forfait qui correspond le mieux à vos besoins. Commencez gratuitement ou profitez de notre essai de 7 jours.
+          <Text fontSize="md" color={useColorModeValue('gray.600', 'gray.400')}>
+            Choisissez le forfait qui correspond le mieux à vos besoins.
           </Text>
         </Stack>
 
         <Grid
           templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}
-          gap={8}
-          px={{ base: 4, md: 0 }}
+          gap={6}
+          px={{ base: 2, md: 0 }}
+          alignItems="stretch"
         >
           {plans.map((plan, index) => (
             <GridItem key={index} colSpan={1}>
               <Box
                 bg={cardBg}
-                p={8}
+                p={6}
+                h="100%"
                 rounded="xl"
-                shadow="lg"
+                shadow="md"
                 borderWidth={plan.popular ? '2px' : '1px'}
                 borderColor={plan.popular ? 'blue.500' : 'gray.200'}
                 position="relative"
+                display="flex"
+                flexDirection="column"
                 _hover={{
-                  transform: 'translateY(-5px)',
-                  transition: 'all 0.3s',
+                  transform: 'translateY(-3px)',
+                  boxShadow: 'lg',
+                  transition: 'all 0.2s',
                 }}
               >
                 {plan.popular && (
@@ -140,19 +145,19 @@ const PricingPage = () => {
                       </Text>
                     </Flex>
                   </Box>
-                  <Box flexGrow={1}>
-                    <List spacing={3} mt={4}>
+                  <Box flexGrow={1} mt={2}>
+                    <List spacing={2} mt={2}>
                       {plan.features.map((feature, i) => (
-                        <ListItem key={i} display="flex" alignItems="center">
-                          <ListIcon as={CheckIcon} color="green.500" />
-                          <Text>{feature}</Text>
+                        <ListItem key={i} display="flex" alignItems="flex-start">
+                          <ListIcon as={CheckIcon} color="green.500" mt={1} />
+                          <Text fontSize="sm">{feature}</Text>
                         </ListItem>
                       ))}
                     </List>
                   </Box>
                   <Button
                     colorScheme={plan.popular ? 'blue' : 'gray'}
-                    size="lg"
+                    size="md"
                     w="full"
                     mt={4}
                     onClick={() => {
@@ -175,10 +180,17 @@ const PricingPage = () => {
           ))}
         </Grid>
 
-        <Box textAlign="center" mt={8}>
-          <Text color={useColorModeValue('gray.600', 'gray.400')}>
-            Vous avez besoin d'une solution personnalisée ?{' '}
-            <Text as="span" color="blue.500" fontWeight="medium" cursor="pointer">
+        <Box textAlign="center" mt={4}>
+          <Text color={useColorModeValue('gray.600', 'gray.400')} fontSize="sm">
+            Besoin d'une solution personnalisée ?{' '}
+            <Text 
+              as="span" 
+              color="blue.500" 
+              fontWeight="medium" 
+              cursor="pointer"
+              onClick={() => navigate('/contact')}
+              _hover={{ textDecoration: 'underline' }}
+            >
               Contactez-nous
             </Text>
           </Text>
