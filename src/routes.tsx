@@ -63,6 +63,8 @@ const HelpAndSupportPage = lazyWithRetry(() => import('./pages/HelpAndSupportPag
 const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'));
 const TeamPage = lazyWithRetry(() => import('./pages/TeamPage'));
 const SoftwareGatewayPage = lazyWithRetry(() => import('./pages/SoftwareGatewayPage'));
+const IconTestPage = lazyWithRetry(() => import('./pages/IconTestPage'));
+const DocumentCustomization = lazyWithRetry(() => import('./pages/DocumentCustomization'));
 
 // Layout protégé avec gestion du chargement
 const ProtectedLayout = () => (
@@ -141,6 +143,8 @@ const AppRoutes = () => {
           <Route path="equipe" element={<TeamPage />} />
           <Route path="software-gateway" element={<SoftwareGatewayPage />} />
           <Route path="passerelle" element={<Navigate to="/software-gateway" replace />} />
+          <Route path="test-icons" element={<IconTestPage />} />
+          <Route path="personnalisation" element={<DocumentCustomization />} />
           {/* Ajoutez ici d'autres routes protégées au besoin */}
         </Route>
         

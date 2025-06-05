@@ -10,6 +10,41 @@ export interface DocumentTemplate {
   showContactSelector?: boolean;
 }
 
+export interface DocumentCustomization {
+  header: {
+    logo?: string;
+    title: string;
+    subtitle?: string;
+    contactInfo: string;
+    showLogo: boolean;
+    showTitle: boolean;
+    showContact: boolean;
+    alignment: 'left' | 'center' | 'right';
+  };
+  footer: {
+    signature?: string;
+    name: string;
+    title: string;
+    contact: {
+      phone: string;
+      email: string;
+      address: string;
+    };
+    showSignature: boolean;
+    showContact: boolean;
+    showLogo: boolean;
+    logo?: string;
+    alignment: 'left' | 'center' | 'right';
+  };
+  styles: {
+    fontFamily: string;
+    primaryColor: string;
+    secondaryColor: string;
+    fontSize: string;
+    lineHeight: number;
+  };
+}
+
 export const documentTemplates: DocumentTemplate[] = [
   {
     id: 'courrier-medecin',

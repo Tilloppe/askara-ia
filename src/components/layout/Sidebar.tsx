@@ -18,7 +18,6 @@ import {
   ChevronDownIcon,
   ViewIcon,
   AtSignIcon,
-  HamburgerIcon,
   LockIcon,
   SunIcon
 } from '@chakra-ui/icons';
@@ -194,17 +193,6 @@ const Sidebar = () => {
               }}
             >
               Profil
-            </MenuItem>
-            <MenuItem 
-              icon={<HamburgerIcon />}
-              as={RouterLink}
-              to="/cabinet"
-              _hover={{
-                textDecoration: 'none',
-                bg: 'gray.100'
-              }}
-            >
-              Cabinet
             </MenuItem>
             <MenuItem 
               icon={<AtSignIcon />}

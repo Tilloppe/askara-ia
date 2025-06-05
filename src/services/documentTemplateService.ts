@@ -1,5 +1,5 @@
-import type { DocumentTemplate } from '../types/documentTemplates';
-import { getTemplateById, getTemplatesByTag, documentTemplates } from '../types/documentTemplates';
+import type { DocumentTemplate } from '../types';
+import { getTemplateById, getTemplatesByTag, documentTemplates } from '../types';
 
 class DocumentTemplateService {
   /**

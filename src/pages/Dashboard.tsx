@@ -34,7 +34,7 @@ import {
   FiChevronDown, 
   FiPlus,
   FiCalendar,
-  FiDollarSign,
+  FiClock,
   FiPieChart,
   FiBarChart2,
   FiFilter,
@@ -42,6 +42,7 @@ import {
   FiMoreVertical
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Données pour les graphiques
@@ -61,11 +62,43 @@ const documentTypes = [
   { name: 'Autres', value: 20, color: '#F6AD55' },
 ];
 
-const recentPatients = [
-  { id: 1, name: 'Jean Dupont', lastVisit: 'Aujourd\'hui', status: 'Nouveau', progress: 80 },
-  { id: 2, name: 'Marie Martin', lastVisit: 'Hier', status: 'En cours', progress: 45 },
-  { id: 3, name: 'Pierre Durand', lastVisit: '23/05/2025', status: 'En attente', progress: 20 },
-  { id: 4, name: 'Sophie Petit', lastVisit: '20/05/2025', status: 'Terminé', progress: 100 },
+const recentDocuments = [
+  { 
+    id: 1, 
+    title: 'Compte-rendu audio', 
+    patient: 'Jean Dupont', 
+    date: 'Aujourd\'hui', 
+    type: 'Compte-rendu', 
+    status: 'Terminé',
+    size: '2.4 Mo'
+  },
+  { 
+    id: 2, 
+    title: 'Ordonnance médicale', 
+    patient: 'Marie Martin', 
+    date: 'Hier', 
+    type: 'Ordonnance', 
+    status: 'En attente',
+    size: '1.8 Mo'
+  },
+  { 
+    id: 3, 
+    title: 'Bilan auditif', 
+    patient: 'Pierre Durand', 
+    date: '23/05/2025', 
+    type: 'Bilan', 
+    status: 'Brouillon',
+    size: '3.2 Mo'
+  },
+  { 
+    id: 4, 
+    title: 'Facture consultation', 
+    patient: 'Sophie Petit', 
+    date: '20/05/2025', 
+    type: 'Facture', 
+    status: 'Envoyé',
+    size: '1.1 Mo'
+  },
 ];
 
 const Dashboard = () => {
@@ -73,6 +106,23 @@ const Dashboard = () => {
   const toast = useToast();
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  
+  // État pour le nombre de documents créés
+  const [documentsCreated, setDocumentsCreated] = useState(() => {
+    // Récupérer le nombre de documents depuis le localStorage ou utiliser 124 comme valeur par défaut
+    const savedCount = localStorage.getItem('documentsCreated');
+    return savedCount ? parseInt(savedCount, 10) : 124;
+  });
+  
+  // Calculer le temps gagné (7 minutes par document)
+  const timeSavedMinutes = documentsCreated * 7;
+  const timeSavedHours = Math.floor(timeSavedMinutes / 60);
+  const remainingMinutes = timeSavedMinutes % 60;
+  
+  // Mettre à jour le localStorage quand le nombre de documents change
+  useEffect(() => {
+    localStorage.setItem('documentsCreated', documentsCreated.toString());
+  }, [documentsCreated]);
 
   const quickActions = [
     {
@@ -84,8 +134,8 @@ const Dashboard = () => {
     },
     {
       icon: FiUserPlus,
-      title: 'Ajouter un patient',
-      description: 'Enregistrer un nouveau patient dans votre base',
+      title: 'Nouveau patient',
+      description: 'Ajouter un nouveau patient à la base de données',
       action: () => navigate('/patients/new'),
       color: 'green',
     },
@@ -98,31 +148,24 @@ const Dashboard = () => {
     },
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Nouveau': return 'blue';
-      case 'En cours': return 'yellow';
-      case 'En attente': return 'orange';
-      case 'Terminé': return 'green';
-      default: return 'gray';
-    }
-  };
-
   return (
-    <Box p={{ base: 4, md: 6 }}>
-      {/* Header */}
+    <Box p={6}>
       <Flex justify="space-between" align="center" mb={8}>
         <Box>
-          <Heading size="lg" mb={1}>Bonjour, Dr. Antoine</Heading>
-          <Text color="gray.500">Voici un aperçu de votre activité</Text>
+          <Heading size="lg" mb={1}>
+            Tableau de bord
+          </Heading>
+          <Text color="gray.500">
+            Bon retour, Dr. Dupont. Voici un aperçu de votre activité.
+          </Text>
         </Box>
         <HStack spacing={4}>
-          <Button leftIcon={<FiPlus />} colorScheme="blue" size="sm">
-            Nouveau
+          <Button leftIcon={<Icon as={FiPlus} />} colorScheme="blue">
+            Nouvelle action
           </Button>
           <IconButton
+            icon={<Icon as={FiBell} />}
             aria-label="Notifications"
-            icon={<FiBell />}
             variant="ghost"
             position="relative"
           >
@@ -179,14 +222,14 @@ const Dashboard = () => {
           <CardBody>
             <HStack justify="space-between">
               <Box>
-                <Text color="gray.500" fontSize="sm" mb={1}>Revenus du mois</Text>
-                <Heading size="lg">4,850€</Heading>
+                <Text color="gray.500" fontSize="sm" mb={1}>Temps gagné</Text>
+                <Heading size="lg">{timeSavedMinutes} min</Heading>
                 <Text color="green.500" fontSize="sm" mt={1}>
-                  +8.2% vs mois dernier
+                  {timeSavedHours > 0 ? `${timeSavedHours}h ${remainingMinutes}min` : `${remainingMinutes}min`} économisées
                 </Text>
               </Box>
               <Box p={3} bg="purple.50" borderRadius="full">
-                <Icon as={FiDollarSign} boxSize={6} color="purple.500" />
+                <Icon as={FiClock} boxSize={6} color="purple.500" />
               </Box>
             </HStack>
           </CardBody>
@@ -197,7 +240,7 @@ const Dashboard = () => {
             <HStack justify="space-between">
               <Box>
                 <Text color="gray.500" fontSize="sm" mb={1}>Documents traités</Text>
-                <Heading size="lg">124</Heading>
+                <Heading size="lg">{documentsCreated}</Heading>
                 <Text color="green.500" fontSize="sm" mt={1}>
                   +15% vs mois dernier
                 </Text>
@@ -252,208 +295,125 @@ const Dashboard = () => {
                   <Line 
                     type="monotone" 
                     dataKey="patients" 
-                    stroke="#4299E1" 
+                    stroke="#3182CE" 
                     strokeWidth={2} 
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6, stroke: '#3182ce', strokeWidth: 2 }}
+                    dot={false}
+                    activeDot={{ r: 6, stroke: '#3182CE', strokeWidth: 2, fill: 'white' }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="documents" 
-                    stroke="#9F7AEA" 
+                    stroke="#38B2AC" 
                     strokeWidth={2} 
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6, stroke: '#805ad5', strokeWidth: 2 }}
                     strokeDasharray="5 5"
+                    dot={false}
+                    activeDot={{ r: 6, stroke: '#38B2AC', strokeWidth: 2, fill: 'white' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </Box>
-            <HStack spacing={6} mt={4} justify="center">
+            <HStack mt={4} spacing={4}>
               <HStack>
-                <Box w={3} h={3} bg="#4299E1" borderRadius="full" />
-                <Text fontSize="sm">Patients</Text>
+                <Box w={3} h={3} bg="blue.400" borderRadius="sm" />
+                <Text fontSize="sm" color="gray.600">Patients</Text>
               </HStack>
               <HStack>
-                <Box w={3} h={3} bg="#9F7AEA" borderRadius="full" />
-                <Text fontSize="sm">Documents</Text>
+                <Box w={3} h={3} bg="teal.400" borderRadius="sm" />
+                <Text fontSize="sm" color="gray.600">Documents</Text>
               </HStack>
             </HStack>
           </CardBody>
         </Card>
 
-        {/* Documents by Type */}
+        {/* Document Types Chart */}
         <Card bg="white" borderRadius="lg" boxShadow="sm">
           <CardBody>
             <HStack justify="space-between" mb={6}>
               <Box>
-                <Text fontWeight="600">Répartition des documents</Text>
-                <Text color="gray.500" fontSize="sm">Par type de document</Text>
+                <Text fontWeight="600">Types de documents</Text>
+                <Text color="gray.500" fontSize="sm">Répartition des documents</Text>
               </Box>
-              <Button size="sm" variant="ghost" rightIcon={<FiDownload />}>
+              <Button 
+                rightIcon={<Icon as={FiDownload} />} 
+                size="sm" 
+                variant="ghost"
+              >
                 Exporter
               </Button>
             </HStack>
-            <HStack spacing={8}>
-              <Box w="40%" h="200px">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={documentTypes}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {documentTypes.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        background: 'white',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Box>
-              <VStack align="start" spacing={3} mt={6}>
-                {documentTypes.map((doc, index) => (
-                  <HStack key={index} w="100%" justify="space-between">
-                    <HStack>
-                      <Box w={3} h={3} bg={doc.color} borderRadius="sm" />
-                      <Text fontSize="sm">{doc.name}</Text>
-                    </HStack>
-                    <Text fontWeight="600" fontSize="sm">{doc.value}%</Text>
-                  </HStack>
-                ))}
-              </VStack>
-            </HStack>
+            <Box h="250px">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={documentTypes}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {documentTypes.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{
+                      background: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+            <SimpleGrid columns={2} spacing={4} mt={6}>
+              {documentTypes.map((doc, index) => (
+                <HStack key={index} spacing={3}>
+                  <Box w={3} h={3} bg={doc.color} borderRadius="sm" />
+                  <Box>
+                    <Text fontSize="sm" fontWeight="500">{doc.name}</Text>
+                    <Text fontSize="sm" color="gray.500">{doc.value}%</Text>
+                  </Box>
+                </HStack>
+              ))}
+            </SimpleGrid>
           </CardBody>
         </Card>
       </SimpleGrid>
 
-      {/* Recent Patients */}
-      <Card bg="white" borderRadius="lg" boxShadow="sm" mb={8}>
-        <CardBody>
-          <HStack justify="space-between" mb={6}>
-            <Box>
-              <Text fontWeight="600">Derniers patients</Text>
-              <Text color="gray.500" fontSize="sm">Patients récemment ajoutés ou modifiés</Text>
-            </Box>
-            <Button size="sm" variant="outline" leftIcon={<FiFilter />}>
-              Filtrer
-            </Button>
-          </HStack>
-          
-          <Box overflowX="auto">
-            <Box minW="800px">
-              <HStack 
-                px={4} 
-                py={2} 
-                bg="gray.50" 
-                borderRadius="md" 
-                mb={2}
-                fontWeight="500"
-                fontSize="sm"
-                color="gray.600"
-              >
-                <Box w="40%">Patient</Box>
-                <Box w="20%">Dernière visite</Box>
-                <Box w="20%">Statut</Box>
-                <Box w="20%">Progression</Box>
-              </HStack>
-              
-              <VStack spacing={3} align="stretch">
-                {recentPatients.map((patient) => (
-                  <Box 
-                    key={patient.id}
-                    p={4} 
-                    borderWidth="1px" 
-                    borderRadius="md"
-                    _hover={{ bg: 'gray.50' }}
-                    cursor="pointer"
-                    onClick={() => navigate(`/patients/${patient.id}`)}
-                  >
-                    <HStack>
-                      <Box w="40%">
-                        <HStack>
-                          <Avatar size="sm" name={patient.name} mr={2} />
-                          <Text fontWeight="500">{patient.name}</Text>
-                        </HStack>
-                      </Box>
-                      <Box w="20%" color="gray.600" fontSize="sm">
-                        {patient.lastVisit}
-                      </Box>
-                      <Box w="20%">
-                        <Badge 
-                          colorScheme={getStatusColor(patient.status)}
-                          variant="subtle"
-                          px={2}
-                          py={1}
-                          borderRadius="full"
-                          fontSize="xs"
-                        >
-                          {patient.status}
-                        </Badge>
-                      </Box>
-                      <Box w="20%">
-                        <HStack spacing={2}>
-                          <Box flex={1}>
-                            <Progress 
-                              value={patient.progress} 
-                              size="sm" 
-                              colorScheme={getStatusColor(patient.status)}
-                              borderRadius="full"
-                            />
-                          </Box>
-                          <Text fontSize="sm" color="gray.500" minW="40px">
-                            {patient.progress}%
-                          </Text>
-                        </HStack>
-                      </Box>
-                    </HStack>
-                  </Box>
-                ))}
-              </VStack>
-            </Box>
-          </Box>
-          
-          <Flex justify="flex-end" mt={4}>
-            <Button variant="link" colorScheme="blue" size="sm">
-              Voir tous les patients
-            </Button>
-          </Flex>
-        </CardBody>
-      </Card>
-
       {/* Quick Actions */}
       <Box mb={8}>
-        <Text fontWeight="600" mb={4}>Actions rapides</Text>
-        <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+        <Text fontSize="lg" fontWeight="600" mb={4}>
+          Actions rapides
+        </Text>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
           {quickActions.map((action, index) => (
             <Button
               key={index}
               variant="outline"
-              height="auto"
-              p={4}
-              borderRadius="lg"
+              p={6}
+              h="auto"
               textAlign="left"
-              whiteSpace="normal"
               onClick={action.action}
+              borderColor="gray.200"
               _hover={{ bg: `${action.color}.50`, borderColor: `${action.color}.200` }}
             >
-              <HStack spacing={3} align="start">
-                <Box p={2} bg={`${action.color}.100`} borderRadius="md">
-                  <Icon as={action.icon} color={`${action.color}.600`} />
+              <HStack spacing={4} w="100%">
+                <Box
+                  p={2}
+                  bg={`${action.color}.100`}
+                  color={`${action.color}.600`}
+                  borderRadius="md"
+                >
+                  <Icon as={action.icon} boxSize={5} />
                 </Box>
-                <Box>
-                  <Text fontWeight="500">{action.title}</Text>
+                <Box flex={1}>
+                  <Text fontWeight="600" color="gray.800">
+                    {action.title}
+                  </Text>
                   <Text fontSize="sm" color="gray.500" mt={1}>
                     {action.description}
                   </Text>
@@ -463,6 +423,131 @@ const Dashboard = () => {
           ))}
         </SimpleGrid>
       </Box>
+
+      {/* Recent Documents */}
+      <Card bg="white" borderRadius="lg" boxShadow="sm" overflow="hidden">
+        <Box p={6} borderBottomWidth="1px" borderColor="gray.100">
+          <HStack justify="space-between">
+            <Box>
+              <Text fontSize="lg" fontWeight="600" mb={1}>
+                Derniers documents créés
+              </Text>
+              <Text color="gray.500" fontSize="sm">
+                {recentDocuments.length} documents récemment créés
+              </Text>
+            </Box>
+            <HStack>
+              <Button 
+                leftIcon={<Icon as={FiFilter} />} 
+                size="sm" 
+                variant="outline"
+              >
+                Filtrer
+              </Button>
+              <Button 
+                leftIcon={<Icon as={FiDownload} />} 
+                size="sm" 
+                variant="outline"
+              >
+                Exporter
+              </Button>
+            </HStack>
+          </HStack>
+        </Box>
+        <Box overflowX="auto">
+          <Box as="table" w="full">
+            <Box as="thead" bg="gray.50">
+              <Box as="tr" h={12}>
+                <Box as="th" px={6} textAlign="left" fontWeight="500" color="gray.500" fontSize="sm">
+                  Titre
+                </Box>
+                <Box as="th" px={6} textAlign="left" fontWeight="500" color="gray.500" fontSize="sm">
+                  Patient
+                </Box>
+                <Box as="th" px={6} textAlign="left" fontWeight="500" color="gray.500" fontSize="sm">
+                  Date
+                </Box>
+                <Box as="th" px={6} textAlign="left" fontWeight="500" color="gray.500" fontSize="sm">
+                  Type
+                </Box>
+                <Box as="th" px={6} textAlign="left" fontWeight="500" color="gray.500" fontSize="sm">
+                  Taille
+                </Box>
+                <Box as="th" px={6} textAlign="left" fontWeight="500" color="gray.500" fontSize="sm">
+                  Statut
+                </Box>
+                <Box as="th" px={6} textAlign="right" fontWeight="500" color="gray.500" fontSize="sm">
+                  Actions
+                </Box>
+              </Box>
+            </Box>
+            <Box as="tbody">
+              {recentDocuments.map((doc) => (
+                <Box 
+                  as="tr" 
+                  key={doc.id} 
+                  h={16}
+                  borderBottomWidth="1px"
+                  borderColor="gray.100"
+                  _last={{ borderBottomWidth: 0 }}
+                  _hover={{ bg: 'gray.50' }}
+                >
+                  <Box as="td" px={6}>
+                    <Text fontWeight="500">{doc.title}</Text>
+                  </Box>
+                  <Box as="td" px={6}>
+                    <Text>{doc.patient}</Text>
+                  </Box>
+                  <Box as="td" px={6} color="gray.500">
+                    {doc.date}
+                  </Box>
+                  <Box as="td" px={6}>
+                    <Badge 
+                      colorScheme={
+                        doc.type === 'Compte-rendu' ? 'blue' : 
+                        doc.type === 'Ordonnance' ? 'green' :
+                        doc.type === 'Bilan' ? 'purple' : 'gray'
+                      }
+                      variant="subtle"
+                      px={2}
+                      py={1}
+                      borderRadius="md"
+                    >
+                      {doc.type}
+                    </Badge>
+                  </Box>
+                  <Box as="td" px={6}>
+                    <Text color="gray.500">{doc.size}</Text>
+                  </Box>
+                  <Box as="td" px={6}>
+                    <Badge 
+                      colorScheme={
+                        doc.status === 'Terminé' ? 'green' : 
+                        doc.status === 'Envoyé' ? 'blue' :
+                        doc.status === 'Brouillon' ? 'yellow' : 'gray'
+                      }
+                      variant="subtle"
+                      px={2}
+                      py={1}
+                      borderRadius="md"
+                    >
+                      {doc.status}
+                    </Badge>
+                  </Box>
+                  <Box as="td" px={6} textAlign="right">
+                    <IconButton
+                      icon={<Icon as={FiMoreVertical} />}
+                      aria-label={`Actions pour le document ${doc.title}`}
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </Card>
     </Box>
   );
 };

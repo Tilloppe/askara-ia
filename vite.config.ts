@@ -4,8 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [
     react({
-      // Activer le Fast Refresh
-      fastRefresh: true,
+      // Configuration de base de React
     }),
   ],
   server: {

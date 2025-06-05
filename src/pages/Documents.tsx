@@ -46,10 +46,10 @@ import {
   AddIcon
 } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
-import type { DocumentTemplate } from '../types/documentTemplates';
-import DocumentTemplateSelector from '../components/documents/DocumentTemplateSelector';
+import { DocumentTemplateSelector } from '../components/documents';
 import type { Document } from '../types/common';
 import { documentService } from '../services/documentService';
+import MedicalDocumentCreator from '../components/documents/MedicalDocumentCreator';
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -62,6 +62,7 @@ const Documents = () => {
   
 
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   
@@ -170,55 +171,47 @@ const Documents = () => {
     if (!document) return;
     
     try {
-      // Si le document a un ID, c'est qu'il a déjà été sauvegardé
-      if (document.id) {
-        // Rafraîchir la liste des documents
-        const updatedDocs = await documentService.getAllDocuments();
-        setDocuments(updatedDocs);
-        setFilteredDocuments(updatedDocs);
-        
-        toast({
-          title: 'Document enregistré',
-          description: 'Le document a été enregistré avec succès.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        // Créer un nouveau document
-        const newDoc = await documentService.createDocument({
-          title: document.title || 'Nouveau document',
-          type: document.type || 'Document personnalisé',
-          patient: document.patient || {
-            id: 'new-patient',
-            name: 'Nouveau patient'
-          },
-          status: 'brouillon',
-          content: document.content || 'Contenu du document...',
-          createdBy: 'Utilisateur actuel',
-          tags: document.tags || [],
-          templateId: document.templateId,
-          patientId: document.patientId
-        });
-        
-        // Mettre à jour la liste des documents
-        const updatedDocs = await documentService.getAllDocuments();
-        setDocuments(updatedDocs);
-        setFilteredDocuments(updatedDocs);
-        
-        toast({
-          title: 'Document créé',
-          description: 'Le document a été créé avec succès.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
+      // Créer un nouveau document avec les données du formulaire
+      const newDocument = {
+        title: document.title || 'Nouveau document',
+        type: document.templateId || 'Document personnalisé',
+        patient: document.patientId ? 
+          { id: document.patientId, name: document.patientName } : 
+          { id: 'new-patient', name: 'Nouveau patient' },
+        status: 'brouillon',
+        content: document.content || 'Contenu du document...',
+        createdBy: 'Utilisateur actuel',
+        tags: document.tags || [],
+        templateId: document.templateId,
+        data: document.data || {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Enregistrer le document
+      await documentService.createDocument(newDocument);
+      
+      // Mettre à jour la liste des documents
+      const updatedDocs = await documentService.getAllDocuments();
+      setDocuments(updatedDocs);
+      setFilteredDocuments(updatedDocs);
+      
+      // Fermer le modal de création
+      setIsCreateModalOpen(false);
+      
+      // Afficher un message de succès
+      toast({
+        title: 'Document créé',
+        description: 'Le document a été créé avec succès.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
-      console.error('Erreur lors de la création/édition du document', error);
+      console.error('Erreur lors de la création du document', error);
       toast({
         title: 'Erreur',
-        description: 'Une erreur est survenue lors de la création/édition du document.',
+        description: 'Une erreur est survenue lors de la création du document.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -231,16 +224,117 @@ const Documents = () => {
       <Box mb={6}>
         <HStack justify="space-between" mb={4}>
           <Heading size="lg">Documents</Heading>
-<DocumentTemplateSelector 
-            onSelect={handleNewDocument}
-            buttonText="Nouveau document"
-            buttonProps={{
-              leftIcon: <AddIcon />,
-              colorScheme: 'blue'
-            }}
-          />
+          <Button
+            leftIcon={<AddIcon />}
+            colorScheme="blue"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Nouveau document
+          </Button>
         </HStack>
       </Box>
+
+      {/* Modal de création de document */}
+      <MedicalDocumentCreator
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        patients={[
+          // Simuler une liste de patients - à remplacer par un appel API réel
+          { id: '1', firstName: 'Jean', lastName: 'Dupont', birthDate: '1980-05-15' },
+          { id: '2', firstName: 'Marie', lastName: 'Martin', birthDate: '1975-11-22' },
+        ]}
+        templates={[
+          // Modèle de compte rendu de consultation ORL
+          {
+            id: '1',
+            title: 'Compte rendu de consultation ORL',
+            content: 'Dr [Nom Prénom] – Oto-Rhino-Laryngologiste  \n' +
+                    'Adresse : [Adresse du cabinet]  \n' +
+                    'Téléphone : [Numéro] – Email : [Email]  \n' +
+                    'Date : [JJ/MM/AAAA]  \n' +
+                    'Patient(e) : [Nom – Prénom]  \n' +
+                    'Date de naissance : [JJ/MM/AAAA]  \n' +
+                    'N° de dossier : [Référence]\n\n' +
+                    '🔹 **Motif de consultation :**  \n' +
+                    '[motif]\n\n' +
+                    '🔹 **Antécédents :**  \n' +
+                    '[antécédents]\n\n' +
+                    '🔹 **Examen clinique :**  \n' +
+                    '[examen]\n\n' +
+                    '🔹 **Examens complémentaires :**  \n' +
+                    '[examens_complémentaires]\n\n' +
+                    '🔹 **Diagnostic :**  \n' +
+                    '[diagnostic]\n\n' +
+                    '🔹 **Conduite à tenir :**  \n' +
+                    '[conduite]\n\n' +
+                    'Signature du praticien  \n' +
+                    '[Nom / cachet]',
+            fields: [
+              'Nom Prénom', 'Adresse du cabinet', 'Numéro', 'Email', 
+              'JJ/MM/AAAA', 'Nom – Prénom', 'JJ/MM/AAAA', 'Référence',
+              'motif', 'antécédents', 'examen', 'examens_complémentaires',
+              'diagnostic', 'conduite', 'Nom / cachet'
+            ]
+          },
+          // Modèle de compte rendu post-opératoire ORL
+          {
+            id: '2',
+            title: 'Compte rendu post-opératoire ORL',
+            content: 'Dr [Nom Prénom] – Oto-Rhino-Laryngologiste  \n' +
+                    'Établissement : [Nom clinique/hôpital]  \n' +
+                    'Date : [JJ/MM/AAAA]  \n' +
+                    'Patient(e) : [Nom – Prénom]  \n' +
+                    'Date de naissance : [JJ/MM/AAAA]  \n' +
+                    'N° de dossier : [Référence]\n\n' +
+                    '🔹 **Intervention pratiquée :** [intervention]\n\n' +
+                    '🔹 **Date de l\'intervention :** [JJ/MM/AAAA]  \n' +
+                    '🔹 **Chirurgien opérateur :** Dr [Nom]  \n' +
+                    '🔹 **Anesthésiste :** Dr [Nom]\n\n' +
+                    '🔹 **Indications :**  \n' +
+                    '[indications]\n\n' +
+                    '🔹 **Technique opératoire :**  \n' +
+                    '[technique]\n\n' +
+                    '🔹 **Suites opératoires immédiates :**  \n' +
+                    '[suites]\n\n' +
+                    '🔹 **Conduite à tenir :**  \n' +
+                    '[conduite]\n\n' +
+                    'Signature du praticien  \n' +
+                    '[Nom / cachet]',
+            fields: [
+              'Nom Prénom', 'Nom clinique/hôpital', 'JJ/MM/AAAA', 'Nom – Prénom',
+              'JJ/MM/AAAA', 'Référence', 'intervention', 'JJ/MM/AAAA',
+              'Nom', 'Nom', 'indications', 'technique', 'suites', 'conduite',
+              'Nom / cachet'
+            ]
+          },
+          // Modèle de dossier MDPH / ALD
+          {
+            id: '3',
+            title: 'Dossier MDPH / ALD',
+            content: '🔹 **Motif de la demande :**  \n' +
+                    '[motif_demande]\n\n' +
+                    '🔹 **Antécédents médicaux :**  \n' +
+                    '[antecedents]\n\n' +
+                    '🔹 **Situation actuelle :**  \n' +
+                    '[situation]\n\n' +
+                    '🔹 **Traitements en cours :**  \n' +
+                    '[traitements]\n\n' +
+                    '🔹 **Évolution :**  \n' +
+                    '[evolution]\n\n' +
+                    '🔹 **Handicap évalué :**  \n' +
+                    '[handicap]\n\n' +
+                    '🔹 **Avis médical :**  \n' +
+                    '[avis]\n\n' +
+                    'Signature et cachet du médecin  \n' +
+                    '[Nom, spécialité, n° RPPS]',
+            fields: [
+              'motif_demande', 'antecedents', 'situation', 'traitements',
+              'evolution', 'handicap', 'avis', 'Nom, spécialité, n° RPPS'
+            ]
+          }
+        ]}
+        onSave={handleNewDocument}
+      />
 
       <Card mb={6}>
         <CardBody>

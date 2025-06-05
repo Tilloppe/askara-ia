@@ -187,7 +187,7 @@ const DocumentTemplateSelector = ({
       setIsSaving(false);
     }
   }, [selectedTemplate, selectedPatient, onSelect, onClose, toast]);
-  
+
   const handleSendEmail = useCallback(async (document: any, recipient: string) => {
     if (!document) return;
     
@@ -218,10 +218,9 @@ const DocumentTemplateSelector = ({
         duration: 5000,
         isClosable: true,
       });
-      throw error;
     }
   }, [toast]);
-  
+
   const handleGenerateDocument = useCallback(async () => {
     if (!selectedTemplate || !selectedPatient) return;
     
@@ -270,9 +269,14 @@ const DocumentTemplateSelector = ({
     }
   }, [selectedTemplate, selectedPatient, formData, handleSaveDocument, toast]);
 
-  return (
-    // ...
-  );
+  // Fonction pour sauvegarder un document
+  const handleSaveDocument = useCallback(async (doc: any) => {
+    if (!selectedTemplate || !selectedPatient) return null;
+    
+    setIsSaving(true);
+    
+    try {
+      const documentToSave = {
         ...doc,
         patient: selectedPatient,
         type: selectedTemplate.name,
@@ -347,6 +351,8 @@ const DocumentTemplateSelector = ({
         status: 'error',
         duration: 5000,
         isClosable: true,
+      });
+    }
   };
 
   loadTemplates();

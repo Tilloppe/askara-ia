@@ -66,7 +66,7 @@ import {
 import { documentService } from '../services/documentService';
 import DocumentTemplateService from '../services/documentTemplateService';
 import type { DocumentWithTemplate, Contact } from '../types/documentDetail';
-import type { DocumentTemplate } from '../types/documentTemplates';
+import type { DocumentTemplate } from '../types';
 
 // Composants
 import ContactSelector from '../components/contacts/ContactSelector';
