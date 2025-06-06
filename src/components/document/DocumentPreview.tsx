@@ -1,16 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   VStack, 
-  HStack, 
   Text, 
-  Divider, 
   useColorModeValue,
   Image,
-  Flex,
-  Spacer,
-  Container
+  Container,
+  Skeleton,
+  useToast,
+  IconButton,
+  Tooltip,
+  Spinner,
+  UnorderedList,
+  ListItem
 } from '@chakra-ui/react';
+import { RepeatIcon, WarningIcon } from '@chakra-ui/icons';
 import type { DocumentCustomization } from '../../types/documentCustomization';
 
 interface DocumentPreviewProps {
@@ -33,42 +37,129 @@ const getAlignmentStyle = (alignment: 'left' | 'center' | 'right') => {
 };
 
 const PreviewHeader: React.FC<{ header: DocumentCustomization['header'] }> = ({ header }) => {
+  const [imageError, setImageError] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const toast = useToast();
+
   if (!header.showLogo && !header.showTitle && !header.showContact) {
     return null;
   }
 
   const alignment = getAlignmentStyle(header.alignment);
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.700', 'gray.300');
+
+  const handleImageError = () => {
+    setImageError(true);
+    setIsImageLoading(false);
+    toast({
+      title: "Erreur de chargement de l'image",
+      description: "Impossible de charger l'image du logo",
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+  };
+
+  const handleRetry = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImageError(false);
+    setIsImageLoading(true);
+  };
 
   return (
     <Box 
       borderBottom="1px solid" 
-      borderColor="gray.200" 
+      borderColor={borderColor}
       pb={4} 
       mb={6}
     >
-      <VStack spacing={2} align={alignment.alignItems} w="100%">
+      <VStack spacing={3} align={alignment.alignItems} w="100%">
         {header.showLogo && header.logo && (
-          <Box mb={3}>
-            <Image 
-              src={header.logo} 
-              alt="Logo" 
-              maxH="60px" 
-              objectFit="contain"
-            />
+          <Box 
+            mb={3} 
+            position="relative" 
+            minH="60px" 
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center"
+          >
+            {isImageLoading && !imageError && (
+              <Skeleton height="60px" width="200px" />
+            )}
+            {!imageError ? (
+              <Image 
+                src={header.logo} 
+                alt="Logo" 
+                maxH="60px" 
+                maxW="100%"
+                objectFit="contain"
+                onError={handleImageError}
+                onLoad={handleImageLoad}
+                display={isImageLoading ? 'none' : 'block'}
+              />
+            ) : (
+              <Box 
+                border="1px dashed" 
+                borderColor="red.300" 
+                p={4} 
+                borderRadius="md"
+                textAlign="center"
+              >
+                <VStack spacing={2}>
+                  <WarningIcon boxSize={6} color="red.500" />
+                  <Text color="red.500" fontSize="sm">
+                    Échec du chargement du logo
+                  </Text>
+                  <Tooltip label="Réessayer">
+                    <IconButton
+                      aria-label="Réessayer"
+                      icon={<RepeatIcon />}
+                      size="sm"
+                      onClick={handleRetry}
+                      colorScheme="red"
+                      variant="ghost"
+                    />
+                  </Tooltip>
+                </VStack>
+              </Box>
+            )}
           </Box>
         )}
         
         {header.showTitle && (
-          <Box>
-            <Text fontSize="xl" fontWeight="bold">{header.title}</Text>
+          <Box textAlign={alignment.textAlign}>
+            <Text 
+              fontSize={{ base: 'xl', md: '2xl' }} 
+              fontWeight="bold"
+              color={textColor}
+            >
+              {header.title}
+            </Text>
             {header.subtitle && (
-              <Text fontSize="md" color="gray.600">{header.subtitle}</Text>
+              <Text 
+                fontSize={{ base: 'sm', md: 'md' }} 
+                color="gray.500"
+                mt={1}
+              >
+                {header.subtitle}
+              </Text>
             )}
           </Box>
         )}
         
         {header.showContact && header.contactInfo && (
-          <Text fontSize="sm" color="gray.600" whiteSpace="pre-line">
+          <Text 
+            fontSize="sm" 
+            color="gray.500" 
+            whiteSpace="pre-line"
+            textAlign={alignment.textAlign}
+            w="100%"
+          >
             {header.contactInfo}
           </Text>
         )}
@@ -160,8 +251,48 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   footer, 
   styles 
 }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'gray.200');
+  const toast = useToast();
+
+  useEffect(() => {
+    // Simuler un chargement pour l'exemple
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [header, footer, styles]);
+
+  if (isLoading) {
+    return (
+      <Box 
+        bg={bgColor} 
+        borderRadius="md" 
+        border="1px solid" 
+        borderColor={borderColor}
+        p={6}
+        w="100%"
+        maxW="210mm"
+        minH="297mm"
+        mx="auto"
+        boxShadow="md"
+        position="relative"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <VStack spacing={4} align="center">
+          <Spinner size="xl" color="blue.500" />
+          <Text color={textColor} fontWeight="medium">
+            Chargement de l'aperçu...
+          </Text>
+        </VStack>
+      </Box>
+    );
+  }
   
   return (
     <Box 
@@ -169,33 +300,79 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
       borderRadius="md" 
       border="1px solid" 
       borderColor={borderColor}
-      p={6}
+      p={{ base: 4, md: 6 }}
       w="100%"
-      maxW="210mm" // Taille A4
+      maxW="210mm"
       minH="297mm"
       mx="auto"
       boxShadow="md"
       position="relative"
+      overflow="hidden"
     >
-      <Container maxW="container.md" px={8}>
+      <Container 
+        maxW="container.md" 
+        px={{ base: 2, md: 8 }}
+        py={4}
+        height="100%"
+        display="flex"
+        flexDirection="column"
+      >
         <PreviewHeader header={header} />
         
         {/* Contenu du document de démonstration */}
-        <Box my={8}>
-          <Text fontSize="2xl" fontWeight="bold" mb={4}>
-            Document de démonstration
-          </Text>
-          <Text mb={4}>
-            Ceci est un aperçu de la mise en page de votre document. Le contenu ici est à titre d'exemple pour vous montrer comment apparaîtront vos en-têtes et pieds de page personnalisés.
-          </Text>
-          <Text>
-            Vous pouvez modifier l'apparence de ce document en utilisant les onglets ci-dessus pour personnaliser l'en-tête, le pied de page et les styles globaux.
-          </Text>
+        <Box 
+          my={8} 
+          flex="1"
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+        >
+          <VStack spacing={6} align="stretch">
+            <Box>
+              <Text 
+                fontSize={{ base: 'xl', md: '2xl' }} 
+                fontWeight="bold" 
+                mb={4}
+                color={textColor}
+              >
+                Document de démonstration
+              </Text>
+              <Text mb={4} color={textColor} lineHeight="tall">
+                Ceci est un aperçu de la mise en page de votre document. Le contenu ici est à titre d'exemple pour vous montrer comment apparaîtront vos en-têtes et pieds de page personnalisés.
+              </Text>
+              <Text color={textColor} lineHeight="tall">
+                Vous pouvez modifier l'apparence de ce document en utilisant les onglets ci-dessus pour personnaliser l'en-tête, le pied de page et les styles globaux.
+              </Text>
+            </Box>
+
+            {/* Exemple de section de document */}
+            <Box mt={8}>
+              <Text 
+                fontSize="lg" 
+                fontWeight="semibold" 
+                mb={3}
+                color={textColor}
+                borderBottom="1px solid"
+                borderColor={borderColor}
+                pb={2}
+              >
+                Section exemple
+              </Text>
+              <Text color={textColor} mb={2}>
+                Voici un exemple de section de document pour vous donner une meilleure idée de la mise en page.
+              </Text>
+              <UnorderedList color={textColor} spacing={2}>
+                <ListItem>Point important 1</ListItem>
+                <ListItem>Point important 2</ListItem>
+                <ListItem>Point important 3</ListItem>
+              </UnorderedList>
+            </Box>
+          </VStack>
         </Box>
         
-        <Spacer />
-        
-        <PreviewFooter footer={footer} styles={styles} />
+        <Box mt="auto">
+          <PreviewFooter footer={footer} styles={styles} />
+        </Box>
       </Container>
     </Box>
   );

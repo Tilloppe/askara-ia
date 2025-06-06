@@ -49,6 +49,16 @@ const lazyWithRetry = (componentImport: any) =>
 
 // Chargement différé des pages
 const Login = lazyWithRetry(() => import('./pages/Login'));
+const HelpCenterPage = lazyWithRetry(() => import('./pages/HelpCenterPage'));
+const HelpFaqPage = lazyWithRetry(() => import('./pages/help/FaqPage'));
+const HelpSupportPage = lazyWithRetry(() => import('./pages/help/SupportPage'));
+const HelpVideosPage = lazyWithRetry(() => import('./pages/help/VideosPage'));
+const HelpDocumentationPage = lazyWithRetry(() => import('./pages/help/DocumentationPage'));
+const HelpDepannagePage = lazyWithRetry(() => import('./pages/help/DepannagePage'));
+const HelpAstucePage = lazyWithRetry(() => import('./pages/help/AstucePage'));
+const HelpGuidePage = lazyWithRetry(() => import('./pages/help/GuidePage'));
+const CommunityPage = lazyWithRetry(() => import('./pages/CommunityPage'));
+const UpdatesPage = lazyWithRetry(() => import('./pages/UpdatesPage'));
 const Logout = lazyWithRetry(() => import('./pages/Logout'));
 const Dashboard = lazyWithRetry(() => import('./pages/Dashboard'));
 const Patients = lazyWithRetry(() => import('./pages/Patients'));
@@ -60,6 +70,7 @@ const DocumentDetail = lazyWithRetry(() => import('./pages/DocumentDetail'));
 const PricingPage = lazyWithRetry(() => import('./pages/PricingPage'));
 const ContactPage = lazyWithRetry(() => import('./pages/ContactPage'));
 const HelpAndSupportPage = lazyWithRetry(() => import('./pages/HelpAndSupportPage'));
+const DocumentationPage = lazyWithRetry(() => import('./pages/DocumentationPage'));
 const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'));
 const TeamPage = lazyWithRetry(() => import('./pages/TeamPage'));
 const SoftwareGatewayPage = lazyWithRetry(() => import('./pages/SoftwareGatewayPage'));
@@ -138,7 +149,20 @@ const AppRoutes = () => {
           <Route path="documents/:id" element={<DocumentDetail />} />
           <Route path="pricing" element={<PricingPage />} />
           <Route path="contact" element={<ContactPage />} />
-          <Route path="help" element={<HelpAndSupportPage />} />
+          <Route path="help">
+            <Route index element={<HelpCenterPage />} />
+            <Route path="faq" element={<HelpFaqPage />} />
+            <Route path="support" element={<HelpSupportPage />} />
+            <Route path="videos" element={<HelpVideosPage />} />
+            <Route path="legacy" element={<HelpAndSupportPage />} />
+            <Route path="documentation" element={<HelpDocumentationPage />} />
+            <Route path="depannage" element={<HelpDepannagePage />} />
+            <Route path="astuce" element={<HelpAstucePage />} />
+            <Route path="guide" element={<HelpGuidePage />} />
+          </Route>
+          <Route path="community" element={<CommunityPage />} />
+          <Route path="updates" element={<UpdatesPage />} />
+          <Route path="documentation" element={<DocumentationPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="equipe" element={<TeamPage />} />
           <Route path="software-gateway" element={<SoftwareGatewayPage />} />

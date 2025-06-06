@@ -16,6 +16,8 @@ import {
   SimpleGrid
 } from '@chakra-ui/react';
 import { EmailIcon, TimeIcon, QuestionIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { Icon } from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
 
 // Interface pour les ressources
 interface ResourceItem {
@@ -23,6 +25,7 @@ interface ResourceItem {
   description: string;
   icon: React.ElementType;
   iconColor: string;
+  link?: string;
 }
 
 const HelpAndSupportPage = () => {
@@ -57,7 +60,8 @@ const HelpAndSupportPage = () => {
       title: "Documentation complète",
       description: "Guide d'utilisation détaillé de l'application",
       icon: ExternalLinkIcon,
-      iconColor: 'blue.500'
+      iconColor: 'blue.500',
+      link: "/documentation"
     },
     {
       title: "Tutoriels vidéo",
@@ -347,42 +351,82 @@ const HelpAndSupportPage = () => {
               </Heading>
               <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
                 {resources.map((resource, index) => (
-                  <Box 
-                    key={index}
-                    bg={useColorModeValue('white', 'gray.800')}
-                    p={6}
-                    rounded="xl"
-                    shadow="md"
-                    borderLeft="4px solid"
-                    borderColor={`${resource.iconColor}.400`}
-                    position="relative"
-                    overflow="hidden"
-                    _hover={{
-                      transform: 'translateY(-6px)',
-                      boxShadow: 'xl',
-                      transition: 'all 0.3s ease',
-                      '.resource-icon': {
-                        transform: 'scale(1.1)',
-                        transition: 'all 0.3s ease'
-                      }
-                    }}
-                    transition="all 0.3s ease"
-                  >
+                  resource.link ? (
+                    <RouterLink key={index} to={resource.link} style={{ textDecoration: 'none' }}>
+                      <Box
+                        bg={useColorModeValue('white', 'gray.800')}
+                        p={6}
+                        rounded="xl"
+                        shadow="md"
+                        borderLeft="4px solid"
+                        borderColor={`${resource.iconColor}.400`}
+                        position="relative"
+                        overflow="hidden"
+                        _hover={{
+                          transform: 'translateY(-6px)',
+                          boxShadow: 'xl',
+                          transition: 'all 0.3s ease',
+                          '.resource-icon': {
+                            transform: 'scale(1.1)',
+                            transition: 'all 0.3s ease'
+                          }
+                        }}
+                        transition="all 0.3s ease"
+                      >
+                        <Icon 
+                          as={resource.icon} 
+                          className="resource-icon"
+                          boxSize={8}
+                          color={`${resource.iconColor}.500`}
+                          mb={4}
+                          transition="all 0.3s ease"
+                        />
+                        <Heading as="h3" size="md" mb={3} color={useColorModeValue('gray.800', 'white')}>
+                          {resource.title}
+                        </Heading>
+                        <Text color={useColorModeValue('gray.600', 'gray.300')} fontSize="sm">
+                          {resource.description}
+                        </Text>
+                      </Box>
+                    </RouterLink>
+                  ) : (
                     <Box
-                      as={resource.icon}
-                      className="resource-icon"
-                      boxSize={8}
-                      color={`${resource.iconColor}.500`}
-                      mb={4}
+                      key={index}
+                      bg={useColorModeValue('white', 'gray.800')}
+                      p={6}
+                      rounded="xl"
+                      shadow="md"
+                      borderLeft="4px solid"
+                      borderColor={`${resource.iconColor}.400`}
+                      position="relative"
+                      overflow="hidden"
+                      _hover={{
+                        transform: 'translateY(-6px)',
+                        boxShadow: 'xl',
+                        transition: 'all 0.3s ease',
+                        '.resource-icon': {
+                          transform: 'scale(1.1)',
+                          transition: 'all 0.3s ease'
+                        }
+                      }}
                       transition="all 0.3s ease"
-                    />
-                    <Heading as="h3" size="md" mb={3} color={useColorModeValue('gray.800', 'white')}>
-                      {resource.title}
-                    </Heading>
-                    <Text color={useColorModeValue('gray.600', 'gray.300')} fontSize="sm">
-                      {resource.description}
-                    </Text>
-                  </Box>
+                    >
+                      <Icon 
+                        as={resource.icon} 
+                        className="resource-icon"
+                        boxSize={8}
+                        color={`${resource.iconColor}.500`}
+                        mb={4}
+                        transition="all 0.3s ease"
+                      />
+                      <Heading as="h3" size="md" mb={3} color={useColorModeValue('gray.800', 'white')}>
+                        {resource.title}
+                      </Heading>
+                      <Text color={useColorModeValue('gray.600', 'gray.300')} fontSize="sm">
+                        {resource.description}
+                      </Text>
+                    </Box>
+                  )
                 ))}
               </SimpleGrid>
             </Box>

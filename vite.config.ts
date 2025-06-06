@@ -8,11 +8,14 @@ export default defineConfig({
     }),
   ],
   server: {
-    port: 5175,
+    port: 3002,
     strictPort: true,
     open: true,
+    cors: true,
     hmr: {
-      overlay: true,
+      port: 3002,
+      protocol: 'ws',
+      overlay: false,
     },
   },
   build: {

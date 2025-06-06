@@ -30,15 +30,8 @@ import {
   FormControl,
   FormLabel
 } from '@chakra-ui/react';
-import { ArrowBackIcon, CopyIcon, DeleteIcon, EditIcon, EmailIcon } from '@chakra-ui/icons';
+import { ArrowBackIcon, CopyIcon, DeleteIcon, EditIcon, EmailIcon, PrintIcon } from '@chakra-ui/icons';
 import ReactMarkdown from 'react-markdown';
-import { documentService } from '../services/documentService';
-
-declare const process: {
-  env: {
-    NODE_ENV: string;
-  };
-};
 
 interface DocumentWithTemplate {
   id: string;
@@ -82,7 +75,7 @@ const DocumentDetail = () => {
   // Gestionnaire d'impression
   const handlePrint = useReactToPrint({
     content: () => contentRef.current,
-  } as any); // Utilisation de 'as any' pour éviter les erreurs de typage temporaires
+  });
   
   // Gestionnaire de sauvegarde
   const handleSave = useCallback(async () => {
@@ -197,235 +190,6 @@ const DocumentDetail = () => {
     ),
   };
   
-  // Formater le contenu du document pour un affichage plus lisible
-  const formatDocumentContent = (content: string) => {
-    // Si le contenu est vide
-    if (!content || content.trim() === '') {
-      return (
-        <Box 
-          textAlign="center" 
-          py={10} 
-          bg="white" 
-          borderRadius="lg" 
-          boxShadow="sm"
-          borderLeft="4px solid"
-          borderColor="blue.500"
-          my={4}
-        >
-          <Text fontSize="lg" color="gray.600">Aucun contenu à afficher</Text>
-        </Box>
-      );
-    }
-
-    // Essayer de parser le contenu comme du JSON
-    try {
-      // Vérifier si le contenu ressemble à du JSON
-      const trimmedContent = content.trim();
-      if ((trimmedContent.startsWith('{') && trimmedContent.endsWith('}')) || 
-          (trimmedContent.startsWith('[') && trimmedContent.endsWith(']'))) {
-        const data = JSON.parse(content);
-        
-        // Si c'est un objet vide
-        if (Object.keys(data).length === 0) {
-          return (
-            <Box 
-              textAlign="center" 
-              py={10} 
-              bg="white" 
-              borderRadius="lg" 
-              boxShadow="sm"
-              my={4}
-            >
-              <Text fontSize="lg" color="gray.600">Aucune donnée à afficher</Text>
-            </Box>
-          );
-        }
-        
-        // Si c'est un objet avec des champs
-        return (
-          <Box 
-            p={6} 
-            bg="white" 
-            borderRadius="xl" 
-            boxShadow="md"
-            border="1px solid"
-            borderColor="gray.100"
-            my={6}
-          >
-            <Box 
-              bg="blue.50" 
-              p={4} 
-              borderRadius="lg" 
-              mb={6}
-              borderLeft="4px solid"
-              borderColor="blue.500"
-            >
-              <Heading size="md" color="blue.800" display="flex" alignItems="center">
-                <Box as="span" mr={2}>📄</Box>
-                Détails du document
-              </Heading>
-            </Box>
-            
-            <Box className="document-fields">
-              {Object.entries(data).map(([key, value]) => {
-                // Formater la clé pour un affichage plus lisible
-                const formattedKey = key
-                  .replace(/([A-Z])/g, ' $1')
-                  .replace(/^./, str => str.toUpperCase())
-                  .replace(/_/g, ' ')
-                  .trim();
-                
-                const displayValue = value === '' ? '(non renseigné)' : value;
-                
-                return (
-                  <Box 
-                    key={key} 
-                    mb={4}
-                    p={4}
-                    bg={value ? 'white' : 'gray.50'}
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor={value ? 'gray.100' : 'gray.200'}
-                    transition="all 0.2s"
-                    _hover={{
-                      borderColor: 'blue.200',
-                      boxShadow: 'sm'
-                    }}
-                  >
-                    <Text 
-                      fontWeight="600" 
-                      color={value ? 'blue.700' : 'gray.500'}
-                      fontSize="md"
-                      mb={2}
-                      display="flex"
-                      alignItems="center"
-                    >
-                      <Box 
-                        as="span" 
-                        mr={2} 
-                        color={value ? 'blue.500' : 'gray.400'}
-                      >
-                        {value ? '•' : '○'}
-                      </Box>
-                      {formattedKey}
-                    </Text>
-                    <Box 
-                      pl={6} 
-                      borderLeft="2px solid" 
-                      borderColor={value ? 'blue.200' : 'gray.200'}
-                      transition="border-color 0.2s"
-                    >
-                      <Text 
-                        fontSize="md" 
-                        whiteSpace="pre-wrap"
-                        color={value ? 'gray.800' : 'gray.500'}
-                        fontFamily={value ? 'body' : 'mono'}
-                      >
-                        {String(displayValue || 'Non renseigné')}
-                      </Text>
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
-            
-            <Box 
-              mt={6} 
-              pt={4} 
-              borderTop="1px solid" 
-              borderColor="gray.100"
-              fontSize="sm"
-              color="gray.500"
-              textAlign="right"
-            >
-              Document généré le {new Date().toLocaleDateString()}
-            </Box>
-          </Box>
-        );
-      }
-      
-      // Si ce n'est pas du JSON, continuer comme du texte normal
-      throw new Error('Pas un JSON valide');
-      
-    } catch (error) {
-      // Vérifier si le contenu contient des marqueurs Markdown
-      const isMarkdown = /^#|^-|^\*\*|^\[|^>|^`/.test(content.trim());
-      
-      if (isMarkdown) {
-        return (
-          <Box 
-            p={8} 
-            bg="white" 
-            borderRadius="xl" 
-            boxShadow="md"
-            border="1px solid"
-            borderColor="gray.100"
-            my={6}
-          >
-            <Box 
-              bg="purple.50" 
-              p={4} 
-              borderRadius="lg" 
-              mb={6}
-              borderLeft="4px solid"
-              borderColor="purple.500"
-            >
-              <Heading size="md" color="purple.800" display="flex" alignItems="center">
-                <Box as="span" mr={2}>📝</Box>
-                Document formaté
-              </Heading>
-            </Box>
-            <Box className="markdown-content">
-              <ReactMarkdown components={markdownComponents}>
-                {content}
-              </ReactMarkdown>
-            </Box>
-          </Box>
-        );
-      }
-      
-      // Sinon afficher le contenu brut
-      return (
-        <Box 
-          p={8} 
-          bg="white" 
-          borderRadius="xl" 
-          boxShadow="md"
-          border="1px solid"
-          borderColor="gray.100"
-          my={6}
-        >
-          <Box 
-            bg="gray.50" 
-            p={4} 
-            borderRadius="lg" 
-            mb={6}
-            borderLeft="4px solid"
-            borderColor="gray.400"
-          >
-            <Heading size="md" color="gray.700" display="flex" alignItems="center">
-              <Box as="span" mr={2}>📄</Box>
-              Contenu du document
-            </Heading>
-          </Box>
-          <Box 
-            p={4}
-            bg="white"
-            borderRadius="md"
-            border="1px solid"
-            borderColor="gray.200"
-            fontFamily="mono"
-            whiteSpace="pre-wrap"
-            lineHeight="tall"
-            color="gray.700"
-          >
-            {content || 'Aucun contenu à afficher'}
-          </Box>
-        </Box>
-      );
-    }
-  };
-
   // Rendu du contenu du document
   const renderDocumentContent = useCallback(() => {
     if (isLoading) {
@@ -487,79 +251,48 @@ const DocumentDetail = () => {
         borderColor={borderColor}
         bg={useColorModeValue('white', 'gray.800')}
       >
-        {formatDocumentContent(content)}
+        <ReactMarkdown components={markdownComponents}>
+          {content}
+        </ReactMarkdown>
       </Box>
     );
   }, [content, document, handleSave, isEditing, isLoading, isSaving, borderColor]);
 
   // Effet pour charger le document
   useEffect(() => {
-    let isMounted = true;
-    
     const loadDocument = async () => {
-      if (!id) return;
-      
-      console.log('Chargement du document avec ID:', id);
-      if (isMounted) setIsLoading(true);
-      
+      setIsLoading(true);
       try {
-        // Charger le document depuis le service
-        const doc = await documentService.getDocumentById(id);
-        
-        if (!isMounted) return;
-        
-        if (!doc) {
-          throw new Error('Document non trouvé');
-        }
-        
-        console.log('Document chargé:', doc);
-        
-        if (isMounted) {
-          setDocument({
-            id: doc.id,
-            title: doc.title,
-            content: doc.content,
-            templateId: doc.templateId
-          });
-          setContent(doc.content);
-        }
+        // Simuler un chargement de document
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Simuler des données de document
+        const mockDocument: DocumentWithTemplate = {
+          id: id || '1',
+          title: 'Mon Document',
+          content: '# Mon Document\n\nCeci est un exemple de contenu en Markdown.\n\n## Section 1\n\n- Premier point\n- Deuxième point\n- Troisième point\n\n## Section 2\n\nVoici un [lien exemple](https://example.com).',
+        };
+        setDocument(mockDocument);
+        setContent(mockDocument.content);
       } catch (error) {
         console.error('Erreur lors du chargement du document :', error);
-        if (isMounted) {
-          toast({
-            title: 'Erreur',
-            description: 'Impossible de charger le document',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-          // Rediriger vers la liste des documents en cas d'erreur
-          navigate('/documents');
-        }
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger le document',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       } finally {
-        if (isMounted) setIsLoading(false);
+        setIsLoading(false);
       }
     };
     
     loadDocument();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [id, toast, navigate]);
+  }, [id, toast]);
   
   // Rendu principal
-  console.log('Rendu du composant DocumentDetail', { document, isEditing, isLoading, content });
-  
   return (
     <Box maxW="6xl" mx="auto" p={4}>
-      {process.env.NODE_ENV === 'development' && (
-        <Box bg="yellow.100" p={2} mb={4} borderRadius="md">
-          <Text fontSize="sm" color="yellow.800">
-            Mode développement - ID: {id} | Chargement: {isLoading ? 'en cours' : 'terminé'} | Document: {document ? 'chargé' : 'non chargé'}
-          </Text>
-        </Box>
-      )}
       {/* En-tête avec boutons d'action */}
       <HStack mb={6} justifyContent="space-between">
         <Button
@@ -598,7 +331,7 @@ const DocumentDetail = () => {
                 {hasCopied ? 'Copié !' : 'Copier'}
               </Button>
               <Button
-                leftIcon={<span>🖨️</span>}
+                leftIcon={<PrintIcon />}
                 variant="outline"
                 onClick={handlePrint}
                 isDisabled={isLoading}

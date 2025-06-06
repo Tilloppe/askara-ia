@@ -26,7 +26,7 @@ import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 const menuItems = [
   { icon: 'home', label: 'Accueil', path: '/' },
   { icon: 'users', label: 'Patients', path: '/patients' },
-  { icon: 'user', label: 'Contacts', path: '/contacts' },
+  { icon: 'contact', label: 'Contacts', path: '/contacts' },
   { icon: 'document', label: 'Documents', path: '/documents' },
 ];
 
@@ -38,6 +38,8 @@ const getIcon = (iconName: string) => {
       return <Icon viewBox="0 0 24 24" w={5} h={5}><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></Icon>;
     case 'user':
       return <Icon viewBox="0 0 24 24" w={5} h={5}><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></Icon>;
+    case 'contact':
+      return <Icon viewBox="0 0 24 24" w={5} h={5}><path fill="currentColor" d="M20 0H4v24h16V0zm-2 22H6V2h12v20zM8 6h8v2H8zm0 4h8v2H8zm0 4h5v2H8z"/></Icon>;
     case 'document':
       return <Icon viewBox="0 0 24 24" w={5} h={5}><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></Icon>;
     case 'help':
